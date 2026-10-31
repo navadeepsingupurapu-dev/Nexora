@@ -12,12 +12,16 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const DB_FILE = path.join(__dirname, 'database.json');
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const DB_FILE = process.env.VERCEL ? path.join('/tmp', 'database.json') : path.join(__dirname, 'database.json');
+const UPLOAD_DIR = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
 
-// Ensure upload directory exists
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// Ensure upload directory exists safely
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
+} catch (err) {
+  // Gracefully handle read-only environments
 }
 
 // ----------------------------------------------------------------------------
@@ -349,12 +353,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`=================================================`);
-  console.log(`  NEXORA BACKEND SERVER ACTIVE`);
-  console.log(`  Port: ${PORT}`);
-  console.log(`  API Health: http://localhost:${PORT}/api/health`);
-  console.log(`  Database: ${DB_FILE}`);
-  console.log(`=================================================`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=================================================`);
+    console.log(`  NEXORA BACKEND SERVER ACTIVE`);
+    console.log(`  Port: ${PORT}`);
+    console.log(`  API Health: http://localhost:${PORT}/api/health`);
+    console.log(`  Database: ${DB_FILE}`);
+    console.log(`=================================================`);
+  });
+}
+
+module.exports = app;
 
