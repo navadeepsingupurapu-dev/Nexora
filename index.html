@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXORA | Ideas Meet Opportunity</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-aesthetic">
+
+  <!-- Interactive Cyber Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="glow-orb orb-primary"></div>
+  <div class="glow-orb orb-secondary"></div>
+  <div class="glow-orb orb-accent"></div>
+  <div class="glow-orb orb-fourth"></div>
+
+  <!-- Floating Aesthetic Ambiance Picker -->
+  <aside class="aesthetic-theme-picker" id="aesthetic-theme-picker" aria-label="Color Palette Switcher">
+    <span class="picker-label">🎨 Ambiance:</span>
+    <button type="button" class="theme-chip active" data-pick-theme="iris" title="Celestial Iris (Lavender, Violet & Cyan)">
+      <span class="chip-color iris-dot"></span>
+      <span class="chip-text">Iris</span>
+    </button>
+    <button type="button" class="theme-chip" data-pick-theme="sage" title="Nordic Sage (Mint, Eucalyptus & Teal)">
+      <span class="chip-color sage-dot"></span>
+      <span class="chip-text">Sage</span>
+    </button>
+    <button type="button" class="theme-chip" data-pick-theme="aurora" title="Sunset Aurora (Peach, Rose Gold & Orchid)">
+      <span class="chip-color aurora-dot"></span>
+      <span class="chip-text">Aurora</span>
+    </button>
+  </aside>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ===================================================================== -->
+  <!-- Main Application Wrapper -->
+  <!-- ===================================================================== -->
+  <div id="app" class="app-root">
+
+    <!-- =================================================================== -->
+    <!-- VIEW 0: ENTRANCE HERO & LANDING INTRO -->
+    <!-- =================================================================== -->
+    <section id="view-entrance" class="view-section active">
+      <div class="entrance-content glass-card-epic">
+        <div class="brand-badge">
+          <span class="pulse-dot"></span>
+          <span>Next-Gen Innovation Ecosystem</span>
+        </div>
+
+        <div class="brand-hero">
+          <div class="logo-emblem">
+            <svg viewBox="0 0 60 60" class="brand-svg">
+              <polygon points="30,5 55,50 30,38 5,50" fill="url(#hero-logo-grad)" stroke="#2563eb" stroke-width="2" />
+              <circle cx="30" cy="30" r="4" fill="#ffffff" />
+              <defs>
+                <linearGradient id="hero-logo-grad" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#2563eb" />
+                  <stop offset="0.5" stop-color="#0284c7" />
+                  <stop offset="1" stop-color="#0d9488" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h1 class="brand-title">NEXORA</h1>
+          <p class="brand-tagline">Ideas Meet Opportunity</p>
+        </div>
+
+        <p class="hero-description">
+          The premier gateway connecting bold visionary entrepreneurs with accredited investors, venture partners, and established companies. Where breakthrough concepts transform into funded realities.
+        </p>
+
+        <div class="entrance-actions entrance-dual-actions">
+          <button id="btn-entrance-signup" class="btn-glow-primary btn-large">
+            <span>🚀 Sign Up — Create a New Account</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <button id="btn-entrance-login" class="btn-secondary-glow btn-large">
+            <span>💼 Login — Already Have an Account</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: AUTHENTICATION (SIGN UP & LOGIN) -->
+    <!-- =================================================================== -->
+    <section id="view-auth" class="view-section">
+      <div class="auth-card glass-card">
+        <!-- Auth Header -->
+        <div class="auth-header">
+          <div class="mini-brand">
+            <svg viewBox="0 0 32 32" width="28" height="28">
+              <polygon points="16,3 29,27 16,21 3,27" fill="url(#auth-grad)" />
+              <defs>
+                <linearGradient id="auth-grad" x1="0" y1="0" x2="32" y2="32">
+                  <stop stop-color="#00f5a0" />
+                  <stop offset="1" stop-color="#00d9f5" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="mini-brand-name">NEXORA</span>
+          </div>
+          <h2 id="auth-main-title">Join the Innovation Network</h2>
+          <p class="auth-subtitle" id="auth-main-subtitle">Choose your preferred sign up method to get started</p>
+        </div>
+
+        <!-- Auth Navigation Tabs -->
+        <div class="auth-tab-bar">
+          <button id="tab-signup" class="auth-tab active" data-auth-mode="signup">
+            <span>Sign Up</span>
+            <span class="tab-indicator"></span>
+          </button>
+          <button id="tab-login" class="auth-tab" data-auth-mode="login">
+            <span>Login</span>
+            <span class="tab-indicator"></span>
+          </button>
+        </div>
+
+        <!-- SIGN UP PANEL -->
+        <div id="panel-signup" class="auth-panel active">
+          <!-- Google Auth Option -->
+          <div class="google-auth-block">
+            <button id="btn-google-signup" class="btn-google" type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-1.9z"/>
+                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+            <div class="auth-divider">
+              <span>or create with credentials</span>
+            </div>
+          </div>
+
+          <!-- Email / Phone Registration Form -->
+          <form id="form-signup" class="auth-form" novalidate>
+            <div class="input-group aura-field">
+              <label for="signup-identifier">Email Address or Phone Number</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <input 
+                  type="text" 
+                  id="signup-identifier" 
+                  placeholder="e.g. innovator@nexora.io or +1 (555) 019-2831" 
+                  autocomplete="username" 
+                  required
+                />
+              </div>
+              <span class="field-error" id="signup-identifier-error"></span>
+            </div>
+
+            <!-- MANDATORY TERMS & CONDITIONS CHECKBOX -->
+            <div class="terms-container">
+              <label class="terms-label" for="signup-terms-checkbox">
+                <div class="custom-checkbox-wrapper">
+                  <input type="checkbox" id="signup-terms-checkbox" class="real-checkbox" />
+                  <div class="styled-checkbox" id="signup-checkbox-display">
+                    <svg class="check-tick" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <span class="terms-text">
+                  I agree to the <a href="#" id="link-open-terms" class="legal-link">Terms and Conditions</a> and <a href="#" id="link-open-privacy" class="legal-link">Privacy Policy</a>.
+                </span>
+              </label>
+              <span class="terms-hint" id="terms-hint-msg">Check the box above to unlock registration.</span>
+            </div>
+
+            <!-- Active / Disabled Continue Button -->
+            <button type="submit" id="btn-signup-continue" class="btn-glow-primary btn-full disabled-state" disabled>
+              <span>Continue to Nexora</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div id="panel-login" class="auth-panel">
+          <form id="form-login" class="auth-form" novalidate>
+            <div class="input-group aura-field">
+              <label for="login-identifier">Registered Email or Phone</label>
+              <div class="input-wrapper">
+                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <input 
+                  type="text" 
+                  id="login-identifier" 
+                  placeholder="Enter your registered email or phone" 
+                  autocomplete="username" 
+                  required
+                />
+              </div>
+              <span class="field-error" id="login-identifier-error"></span>
+            </div>
+
+            <button type="submit" id="btn-login-submit" class="btn-glow-primary btn-full">
+              <span>Sign In to Your Account</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+            </button>
+
+            <div class="auth-card-footer">
+              <p>New to Nexora? <a href="#" id="switch-to-signup" class="text-link">Create an account</a></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: CHOOSE YOUR JOURNEY -->
+    <!-- =================================================================== -->
+    <section id="view-journey" class="view-section">
+      <div class="journey-container">
+        <div class="journey-heading-block">
+          <div class="brand-badge small">
+            <span>Identity Protocol</span>
+          </div>
+          <h2 class="journey-title">Welcome to Nexora.</h2>
+          <p class="journey-subtitle">What brings you here today?</p>
+        </div>
+
+        <div class="journey-cards-grid">
+          <!-- CARD 1: INVESTOR -->
+          <div class="journey-card glass-card sponsor-card" id="card-journey-sponsor" tabindex="0" role="button">
+            <div class="journey-icon-wrap cyan-gradient">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                <circle cx="12" cy="12" r="1.5"></circle>
+              </svg>
+            </div>
+            <div class="journey-badge cyan">ACCREDITED INVESTOR</div>
+            <h3 class="journey-role-name">Investor</h3>
+            <p class="journey-role-desc">
+              "I want to discover innovative ideas and invest in entrepreneurs."
+            </p>
+            <ul class="journey-perks">
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Discover high-growth early stage ventures</li>
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Filter by funding goals, stage & domain</li>
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Direct secure communication & term sheets</li>
+            </ul>
+            <div class="journey-cta">
+              <span>Select Investor Journey</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- CARD 2: ENTREPRENEUR -->
+          <div class="journey-card glass-card entrepreneur-card" id="card-journey-entrepreneur" tabindex="0" role="button">
+            <div class="journey-icon-wrap purple-gradient">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+              </svg>
+            </div>
+            <div class="journey-badge purple">FOUNDER & INNOVATOR</div>
+            <h3 class="journey-role-name">Entrepreneur</h3>
+            <p class="journey-role-desc">
+              "I have an innovative idea and I'm looking for investment and support."
+            </p>
+            <ul class="journey-perks">
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Showcase to accredited angel investors</li>
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Bank-grade confidential pitch document vaults</li>
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Secure capital, mentorship & strategic network</li>
+            </ul>
+            <div class="journey-cta">
+              <span>Select Entrepreneur Journey</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 3: INVESTOR QUESTIONNAIRE (PREVIOUS INVESTMENTS) -->
+    <!-- =================================================================== -->
+    <section id="view-sponsor-gate" class="view-section">
+      <div class="sponsor-gate-container glass-card">
+        <div class="gate-header">
+          <div class="gate-icon-pulse">💼</div>
+          <h2>Investor Onboarding</h2>
+          <p class="gate-question">Have you invested in an entrepreneur or startup before?</p>
+        </div>
+
+        <div class="gate-choice-buttons">
+          <button id="btn-sponsor-yes" class="gate-btn" data-choice="yes">
+            <span class="choice-tag">Option A</span>
+            <span class="choice-title">Yes, I Have Invested Before</span>
+            <span class="choice-sub">Share your investment experience to build founder trust</span>
+          </button>
+          <button id="btn-sponsor-no" class="gate-btn" data-choice="no">
+            <span class="choice-tag">Option B</span>
+            <span class="choice-title">No, This Is My First Time</span>
+            <span class="choice-sub">Explore new ventures with investor guidance</span>
+          </button>
+        </div>
+
+        <!-- FORM IF YES -->
+        <div id="sponsor-yes-form-panel" class="sponsor-subpanel hidden">
+          <h3 class="subpanel-title">Investment Track Record</h3>
+          <form id="form-sponsor-history" class="grid-form">
+            <div class="input-group aura-field">
+              <label for="sp-name">Investor Name or Firm Name *</label>
+              <input type="text" id="sp-name" placeholder="e.g. Apex Horizon Capital / Marcus Vance" required />
+            </div>
+
+            <div class="input-group aura-field">
+              <label for="sp-entrepreneur-name">Name of Entrepreneur or Startup Previously Funded *</label>
+              <input type="text" id="sp-entrepreneur-name" placeholder="e.g. Sarah Jenkins" required />
+            </div>
+
+            <div class="input-group aura-field full-width">
+              <label for="sp-idea">What was the entrepreneur's idea or venture? *</label>
+              <input type="text" id="sp-idea" placeholder="e.g. Autonomous drone delivery for emergency medical supplies" required />
+            </div>
+
+            <div class="input-group full-width">
+              <label>Type of Support / Capital Provided *</label>
+              <div class="chips-container" id="sp-support-types">
+                <button type="button" class="support-chip active" data-val="Financial Investment">💰 Financial Investment</button>
+                <button type="button" class="support-chip" data-val="Technical">⚙️ Technical Advisory</button>
+                <button type="button" class="support-chip" data-val="Mentorship">🧠 Strategic Mentorship</button>
+                <button type="button" class="support-chip" data-val="Other">🌐 Network / Other</button>
+              </div>
+            </div>
+
+            <div class="input-group aura-field full-width">
+              <label for="sp-details">Optional Supporting Details</label>
+              <textarea id="sp-details" rows="3" placeholder="Highlight investment size, key milestones achieved, or duration..."></textarea>
+            </div>
+
+            <div class="form-actions full-width">
+              <button type="submit" class="btn-glow-primary">
+                <span>Continue to Investor Dashboard</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- WELCOME SCREEN IF NO -->
+        <div id="sponsor-no-welcome-panel" class="sponsor-subpanel hidden">
+          <div class="first-time-welcome">
+            <div class="sparkle-orbit">✨</div>
+            <h3 class="welcome-quote">"Every great idea deserves an opportunity. Let's begin your investment journey!"</h3>
+            <p class="welcome-subtext">
+              Nexora pairs you with thoroughly vetted innovators, transparent pitch materials, and secure confidentiality protocols.
+            </p>
+            <button id="btn-enter-sponsor-dash" class="btn-glow-primary btn-large">
+              <span>Enter Investor Dashboard</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 4: SPONSOR DASHBOARD -->
+    <!-- =================================================================== -->
+    <section id="view-sponsor-dashboard" class="view-section dashboard-layout">
+      <!-- Dashboard Topbar Navigation -->
+      <header class="dash-topbar">
+        <div class="dash-brand">
+          <div class="logo-emblem small">
+            <svg viewBox="0 0 32 32" width="24" height="24">
+              <polygon points="16,3 29,27 16,21 3,27" fill="url(#dash-brand-grad)" />
+              <defs>
+                <linearGradient id="dash-brand-grad" x1="0" y1="0" x2="32" y2="32">
+                  <stop stop-color="#00f5a0" />
+                  <stop offset="1" stop-color="#00d9f5" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="dash-brand-title">NEXORA</span>
+          <span class="role-badge sponsor-badge">Investor Portal</span>
+        </div>
+
+        <nav class="dash-nav-links">
+          <button class="dash-nav-item active" data-sponsor-tab="discover">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Discover Ideas</span>
+          </button>
+          <button class="dash-nav-item" data-sponsor-tab="saved">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span>Saved Ideas</span>
+            <span id="saved-ideas-badge" class="counter-badge">0</span>
+          </button>
+          <button class="dash-nav-item" data-sponsor-tab="sponsorships">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>My Investments</span>
+          </button>
+          <button class="dash-nav-item" data-sponsor-tab="messages">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Messages</span>
+          </button>
+        </nav>
+
+        <div class="dash-user-bar">
+          <div class="user-info">
+            <span class="user-greeting" id="sp-user-greeting">Welcome, Investor</span>
+            <span class="user-status-dot online"></span>
+          </div>
+          <button id="btn-sponsor-logout" class="btn-logout" title="Log Out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Sponsor Content Area -->
+      <main class="dash-main-container">
+
+        <!-- TAB: DISCOVER IDEAS -->
+        <section id="tab-content-discover" class="sponsor-subtab active">
+          <!-- Search & Filter Bar -->
+          <div class="filter-glass-card glass-card">
+            <div class="search-input-wrap aura-field">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="sponsor-search-input" placeholder="Search ideas by keyword, venture title, problem, or founder..." />
+            </div>
+
+            <div class="filters-grid">
+              <div class="filter-control">
+                <label for="filter-industry">Industry</label>
+                <select id="filter-industry" class="custom-select">
+                  <option value="all">All Industries</option>
+                  <option value="AI & Robotics">AI & Robotics</option>
+                  <option value="Greentech">Greentech / Climate</option>
+                  <option value="DeepTech">DeepTech</option>
+                  <option value="Healthtech">Healthtech</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="EdTech">EdTech</option>
+                </select>
+              </div>
+
+              <div class="filter-control">
+                <label for="filter-stage">Startup Stage</label>
+                <select id="filter-stage" class="custom-select">
+                  <option value="all">All Stages</option>
+                  <option value="Idea">Idea</option>
+                  <option value="Research">Research</option>
+                  <option value="Prototype">Prototype</option>
+                  <option value="Developed Product">Developed Product</option>
+                </select>
+              </div>
+
+              <div class="filter-control">
+                <label for="filter-funding">Funding Requirement</label>
+                <select id="filter-funding" class="custom-select">
+                  <option value="all">Any Funding Range</option>
+                  <option value="100000">Under $100,000</option>
+                  <option value="250000">Under $250,000</option>
+                  <option value="500000">Under $500,000</option>
+                  <option value="1000000">Under $1,000,000</option>
+                </select>
+              </div>
+
+              <button id="btn-reset-filters" class="btn-secondary-reset">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Section: Recommended & All Opportunities -->
+          <div class="ventures-feed-header">
+            <div class="section-title-wrap">
+              <h2 class="section-heading">Featured & Recommended Ventures</h2>
+              <p class="section-subheading">Curated high-potential initiatives seeking sponsorship and strategic partnerships</p>
+            </div>
+            <div class="view-stats-pill" id="ventures-count-pill">Showing 5 Opportunities</div>
+          </div>
+
+          <!-- Grid of Idea Cards -->
+          <div id="ventures-grid" class="ventures-grid">
+            <!-- Dynamically populated by JS -->
+          </div>
+        </section>
+
+        <!-- TAB: SAVED IDEAS -->
+        <section id="tab-content-saved" class="sponsor-subtab">
+          <div class="subtab-header">
+            <h2>Saved Opportunities</h2>
+            <p>Your curated shortlist of potential ventures to invest in</p>
+          </div>
+          <div id="saved-ventures-grid" class="ventures-grid">
+            <!-- Dynamically rendered -->
+          </div>
+        </section>
+
+        <!-- TAB: MY SPONSORSHIPS -->
+        <section id="tab-content-sponsorships" class="sponsor-subtab">
+          <div class="subtab-header">
+            <h2>Active Investment Proposals & Inquiries</h2>
+            <p>Track your interest submissions and communication statuses with founders</p>
+          </div>
+          <div id="sponsorships-list-container" class="sponsorships-table-wrap glass-card">
+            <!-- Dynamically rendered -->
+          </div>
+        </section>
+
+        <!-- TAB: MESSAGES -->
+        <section id="tab-content-messages" class="sponsor-subtab">
+          <div class="subtab-header">
+            <h2>Secure Founder Communications</h2>
+            <p>Encrypted direct messages with entrepreneurs regarding investments and deck access</p>
+          </div>
+          <div class="chat-portal-layout glass-card">
+            <div class="chat-thread-list" id="sponsor-chat-threads">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="chat-conversation-area" id="sponsor-active-chat">
+              <div class="chat-placeholder">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <p>Select a venture conversation to start exchanging messages.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 5: ENTREPRENEUR MULTI-STEP ONBOARDING JOURNEY -->
+    <!-- =================================================================== -->
+    <section id="view-entrepreneur-wizard" class="view-section">
+      <div class="wizard-container glass-card">
+        
+        <!-- Wizard Header -->
+        <div class="wizard-header">
+          <div class="wizard-badge">FOUNDER ACCELERATOR</div>
+          <h2 class="wizard-headline">Welcome, Innovator! Let's bring your idea to life.</h2>
+          <p class="wizard-sub">Complete this multi-step registration to showcase your venture to accredited investors.</p>
+        </div>
+
+        <!-- Wizard Stepper Indicator -->
+        <div class="stepper-bar">
+          <div class="step-node active" data-step="1">
+            <div class="step-circle">1</div>
+            <span class="step-text">Personal</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-node" data-step="2">
+            <div class="step-circle">2</div>
+            <span class="step-text">Venture</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-node" data-step="3">
+            <div class="step-circle">3</div>
+            <span class="step-text">Funding</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-node" data-step="4">
+            <div class="step-circle">4</div>
+            <span class="step-text">Documents</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-node" data-step="5">
+            <div class="step-circle">5</div>
+            <span class="step-text">Review</span>
+          </div>
+        </div>
+
+        <!-- WIZARD STEP FORMS -->
+        <form id="form-entrepreneur-wizard" novalidate>
+
+          <!-- STEP 1: PERSONAL DETAILS -->
+          <div class="wizard-step-pane active" id="wizard-step-1">
+            <h3 class="step-pane-title">Step 1: Personal Details</h3>
+            <p class="step-pane-sub">Tell us about yourself so investors know the visionary behind the venture.</p>
+
+            <div class="grid-form two-cols">
+              <div class="input-group aura-field">
+                <label for="ent-fullname">Full Name *</label>
+                <input type="text" id="ent-fullname" placeholder="e.g. Elena Rostova" required />
+                <span class="field-error" id="err-ent-fullname"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-age">Age *</label>
+                <input type="number" id="ent-age" min="16" max="100" placeholder="e.g. 24" required />
+                <span class="field-error" id="err-ent-age"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-gender">Gender (Optional)</label>
+                <select id="ent-gender" class="custom-select">
+                  <option value="">Prefer not to disclose</option>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Non-Binary">Non-Binary</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-email">Email Address *</label>
+                <input type="email" id="ent-email" placeholder="e.g. founder@nexora.io" required />
+                <span class="field-error" id="err-ent-email"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-phone">Phone Number *</label>
+                <input type="tel" id="ent-phone" placeholder="e.g. +1 (555) 234-5678" required />
+                <span class="field-error" id="err-ent-phone"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-org">University or Organization *</label>
+                <input type="text" id="ent-org" placeholder="e.g. Stanford University / BioMed Labs" required />
+                <span class="field-error" id="err-ent-org"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-occupation">Occupation *</label>
+                <input type="text" id="ent-occupation" placeholder="e.g. Biomedical Engineer / Tech Lead" required />
+                <span class="field-error" id="err-ent-occupation"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-location">Location (City, Country) *</label>
+                <input type="text" id="ent-location" placeholder="e.g. San Francisco, USA / Bengaluru, India" required />
+                <span class="field-error" id="err-ent-location"></span>
+              </div>
+            </div>
+
+            <div class="wizard-nav-actions">
+              <button type="button" class="btn-glow-primary btn-next" data-next-step="2">
+                <span>Continue to Venture Details</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: VENTURE INFORMATION -->
+          <div class="wizard-step-pane" id="wizard-step-2">
+            <h3 class="step-pane-title">Step 2: Venture Information</h3>
+            <p class="step-pane-sub">Describe the problem, your disruptive solution, and the current maturity of your idea.</p>
+
+            <div class="grid-form two-cols">
+              <div class="input-group aura-field">
+                <label for="ent-vname">Venture or Startup Name *</label>
+                <input type="text" id="ent-vname" placeholder="e.g. NeuroSync AI" required />
+                <span class="field-error" id="err-ent-vname"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-industry">Industry or Domain *</label>
+                <select id="ent-industry" class="custom-select" required>
+                  <option value="">Select Domain</option>
+                  <option value="AI & Robotics">AI & Robotics</option>
+                  <option value="Greentech">Greentech / Climate</option>
+                  <option value="Healthtech">Healthtech / BioMed</option>
+                  <option value="DeepTech">DeepTech / Quantum</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="EdTech">EdTech</option>
+                  <option value="Other">Other Category</option>
+                </select>
+                <span class="field-error" id="err-ent-industry"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-shortdesc">Short Description of the Idea *</label>
+                <input type="text" id="ent-shortdesc" placeholder="One clear sentence encapsulating your startup's vision" maxlength="150" required />
+                <span class="field-error" id="err-ent-shortdesc"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-problem">What problem does your idea solve? *</label>
+                <textarea id="ent-problem" rows="3" placeholder="Explain the pain point, market friction, or inefficiency..." required></textarea>
+                <span class="field-error" id="err-ent-problem"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-solution">What solution are you proposing? *</label>
+                <textarea id="ent-solution" rows="3" placeholder="Detail how your concept, product, or software solves the problem..." required></textarea>
+                <span class="field-error" id="err-ent-solution"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-beneficiaries">Who will benefit from this idea? *</label>
+                <input type="text" id="ent-beneficiaries" placeholder="e.g. Hospital patients, logistics operators..." required />
+                <span class="field-error" id="err-ent-beneficiaries"></span>
+              </div>
+
+              <div class="input-group aura-field">
+                <label for="ent-unique">What makes your idea unique? *</label>
+                <input type="text" id="ent-unique" placeholder="e.g. 10x lower latency, patented enzyme..." required />
+                <span class="field-error" id="err-ent-unique"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-stage">Current Development Stage *</label>
+                <div class="stage-options-grid">
+                  <label class="stage-option">
+                    <input type="radio" name="ent-stage" value="Idea" checked />
+                    <span class="stage-card-box">
+                      <span class="stage-title">💡 Idea</span>
+                      <span class="stage-desc">Conceptual validation & initial design</span>
+                    </span>
+                  </label>
+                  <label class="stage-option">
+                    <input type="radio" name="ent-stage" value="Research" />
+                    <span class="stage-card-box">
+                      <span class="stage-title">🔬 Research</span>
+                      <span class="stage-desc">Lab testing, market surveys & feasibility</span>
+                    </span>
+                  </label>
+                  <label class="stage-option">
+                    <input type="radio" name="ent-stage" value="Prototype" />
+                    <span class="stage-card-box">
+                      <span class="stage-title">🛠 Prototype</span>
+                      <span class="stage-desc">Working MVP or functional alpha build</span>
+                    </span>
+                  </label>
+                  <label class="stage-option">
+                    <input type="radio" name="ent-stage" value="Developed Product" />
+                    <span class="stage-card-box">
+                      <span class="stage-title">🚀 Developed Product</span>
+                      <span class="stage-desc">Commercial readiness with early adopters</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav-actions split">
+              <button type="button" class="btn-outline-back" data-prev-step="1">Back</button>
+              <button type="button" class="btn-glow-primary btn-next" data-next-step="3">
+                <span>Continue to Funding Needs</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: FUNDING AND SUPPORT REQUIREMENTS -->
+          <div class="wizard-step-pane" id="wizard-step-3">
+            <h3 class="step-pane-title">Step 3: Funding & Support Requirements</h3>
+            <p class="step-pane-sub">Specify the capital and strategic assistance you require from investors.</p>
+
+            <div class="grid-form two-cols">
+              <div class="input-group aura-field">
+                <label for="ent-funding-amount">Estimated Funding Required (USD) *</label>
+                <div class="input-wrapper">
+                  <span class="currency-tag">$</span>
+                  <input type="number" id="ent-funding-amount" placeholder="e.g. 150000" min="1000" required />
+                </div>
+                <span class="field-error" id="err-ent-funding-amount"></span>
+              </div>
+
+              <div class="input-group full-width">
+                <label>Type of Support Needed * (Select all that apply)</label>
+                <div class="checkbox-pill-group" id="ent-support-checkboxes">
+                  <label class="pill-check">
+                    <input type="checkbox" value="Financial" checked />
+                    <span>💰 Financial Investment</span>
+                  </label>
+                  <label class="pill-check">
+                    <input type="checkbox" value="Technical" />
+                    <span>⚙️ Technical / Engineering</span>
+                  </label>
+                  <label class="pill-check">
+                    <input type="checkbox" value="Mentorship" />
+                    <span>🧠 Mentorship & Advisory</span>
+                  </label>
+                  <label class="pill-check">
+                    <input type="checkbox" value="Marketing" />
+                    <span>📢 Marketing & Distribution</span>
+                  </label>
+                  <label class="pill-check">
+                    <input type="checkbox" value="Other" />
+                    <span>🌐 Regulatory / Other</span>
+                  </label>
+                </div>
+                <span class="field-error" id="err-ent-support-types"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-funding-use">How will the funding be used? *</label>
+                <textarea id="ent-funding-use" rows="3" placeholder="e.g. 45% for prototype tooling, 30% clinical trials, 25% patent filings..." required></textarea>
+                <span class="field-error" id="err-ent-funding-use"></span>
+              </div>
+
+              <div class="input-group aura-field full-width">
+                <label for="ent-expected-outcome">Expected outcome of the investment *</label>
+                <textarea id="ent-expected-outcome" rows="3" placeholder="e.g. Achieve commercial prototype readiness and initiate pilot customer deployment in 6 months..." required></textarea>
+                <span class="field-error" id="err-ent-expected-outcome"></span>
+              </div>
+            </div>
+
+            <div class="wizard-nav-actions split">
+              <button type="button" class="btn-outline-back" data-prev-step="2">Back</button>
+              <button type="button" class="btn-glow-primary btn-next" data-next-step="4">
+                <span>Continue to Document Vault</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: DOCUMENT UPLOAD -->
+          <div class="wizard-step-pane" id="wizard-step-4">
+            <h3 class="step-pane-title">Step 4: Document Upload</h3>
+            <p class="step-pane-sub">Upload your pitch deck, technical roadmap, or patent filings. You can mark documents as public overview or confidential.</p>
+
+            <!-- Drag & Drop Upload Zone -->
+            <div id="drop-zone" class="drop-zone">
+              <input type="file" id="file-input-element" class="hidden-file-input" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.png,.jpg,.jpeg" />
+              <div class="drop-zone-content">
+                <div class="upload-icon-pulse">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                </div>
+                <h4 class="drop-headline">Drag and drop your project documents here</h4>
+                <p class="drop-sub">Supported formats: <strong>PDF, PPT/PPTX, DOC/DOCX, Images</strong> (Max 25MB per file)</p>
+                <button type="button" id="btn-browse-files" class="btn-secondary-glow">Browse Local Files</button>
+              </div>
+            </div>
+
+            <!-- Uploaded Files List -->
+            <div class="uploaded-files-section">
+              <h4 class="uploaded-files-heading">Uploaded Documents (<span id="upload-files-count">0</span>)</h4>
+              <div id="uploaded-files-list" class="uploaded-files-list">
+                <!-- Dynamically populated files -->
+              </div>
+            </div>
+
+            <!-- Mandatory Document Rights Checkbox -->
+            <div class="terms-container upload-confirm-wrap">
+              <label class="terms-label" for="ent-doc-confirm-checkbox">
+                <div class="custom-checkbox-wrapper">
+                  <input type="checkbox" id="ent-doc-confirm-checkbox" class="real-checkbox" />
+                  <div class="styled-checkbox" id="ent-doc-checkbox-display">
+                    <svg class="check-tick" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <span class="terms-text">
+                  I confirm that the information submitted is accurate and that I have the right to share these documents.
+                </span>
+              </label>
+              <span class="field-error" id="err-ent-doc-confirm"></span>
+            </div>
+
+            <div class="wizard-nav-actions split">
+              <button type="button" class="btn-outline-back" data-prev-step="3">Back</button>
+              <button type="button" class="btn-glow-primary btn-next" data-next-step="5">
+                <span>Continue to Final Review</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 5: REVIEW AND SUBMIT -->
+          <div class="wizard-step-pane" id="wizard-step-5">
+            <h3 class="step-pane-title">Step 5: Review & Submit</h3>
+            <p class="step-pane-sub">Review your submission summary before publishing your venture to the Nexora ecosystem.</p>
+
+            <div class="review-summary-card glass-card">
+              <!-- Personal Details Summary -->
+              <div class="review-section">
+                <div class="review-header-row">
+                  <h4>Personal Details</h4>
+                  <button type="button" class="btn-text-edit" data-jump-step="1">Edit</button>
+                </div>
+                <div class="review-grid" id="summary-personal-grid">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+
+              <!-- Venture Info Summary -->
+              <div class="review-section">
+                <div class="review-header-row">
+                  <h4>Venture Information</h4>
+                  <button type="button" class="btn-text-edit" data-jump-step="2">Edit</button>
+                </div>
+                <div class="review-grid" id="summary-venture-grid">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+
+              <!-- Funding Summary -->
+              <div class="review-section">
+                <div class="review-header-row">
+                  <h4>Funding & Support Needs</h4>
+                  <button type="button" class="btn-text-edit" data-jump-step="3">Edit</button>
+                </div>
+                <div class="review-grid" id="summary-funding-grid">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+
+              <!-- Documents Summary -->
+              <div class="review-section">
+                <div class="review-header-row">
+                  <h4>Uploaded Documents & Privacy</h4>
+                  <button type="button" class="btn-text-edit" data-jump-step="4">Edit</button>
+                </div>
+                <div id="summary-docs-list">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav-actions split">
+              <button type="button" class="btn-outline-back" data-prev-step="4">Back</button>
+              <button type="submit" id="btn-submit-venture" class="btn-glow-primary btn-large">
+                <span class="btn-icon">🚀</span>
+                <span>Submit Idea to Nexora</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 6: ENTREPRENEUR DASHBOARD -->
+    <!-- =================================================================== -->
+    <section id="view-entrepreneur-dashboard" class="view-section dashboard-layout">
+      <!-- Dashboard Topbar -->
+      <header class="dash-topbar">
+        <div class="dash-brand">
+          <div class="logo-emblem small">
+            <svg viewBox="0 0 32 32" width="24" height="24">
+              <polygon points="16,3 29,27 16,21 3,27" fill="url(#ent-dash-grad)" />
+              <defs>
+                <linearGradient id="ent-dash-grad" x1="0" y1="0" x2="32" y2="32">
+                  <stop stop-color="#00f5a0" />
+                  <stop offset="1" stop-color="#3b82f6" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="dash-brand-title">NEXORA</span>
+          <span class="role-badge ent-badge">Founder Dashboard</span>
+        </div>
+
+        <nav class="dash-nav-links">
+          <button class="dash-nav-item active" data-ent-tab="my-venture">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            <span>My Venture</span>
+          </button>
+          <button class="dash-nav-item" data-ent-tab="edit-venture">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span>Edit Venture</span>
+          </button>
+          <button class="dash-nav-item" data-ent-tab="documents">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Documents Vault</span>
+          </button>
+          <button class="dash-nav-item" data-ent-tab="requests">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            <span>Investment Proposals</span>
+            <span id="ent-inquiries-badge" class="counter-badge">0</span>
+          </button>
+          <button class="dash-nav-item" data-ent-tab="messages">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Messages</span>
+          </button>
+          <button class="dash-nav-item" data-ent-tab="privacy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Privacy Controls</span>
+          </button>
+        </nav>
+
+        <div class="dash-user-bar">
+          <div class="user-info">
+            <span class="user-greeting" id="ent-user-greeting">Welcome, Founder</span>
+            <span class="user-status-dot online"></span>
+          </div>
+          <button id="btn-ent-logout" class="btn-logout" title="Log Out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Entrepreneur Content Area -->
+      <main class="dash-main-container">
+
+        <!-- Top Metrics Bar -->
+        <div class="founder-metrics-grid">
+          <div class="metric-card glass-card">
+            <div class="metric-icon purple">🎯</div>
+            <div class="metric-info">
+              <span class="metric-val" id="metric-completion">95%</span>
+              <span class="metric-lbl">Profile Completion</span>
+            </div>
+            <div class="metric-progress-bar">
+              <div class="metric-fill" style="width: 95%;"></div>
+            </div>
+          </div>
+
+          <div class="metric-card glass-card">
+            <div class="metric-icon cyan">💼</div>
+            <div class="metric-info">
+              <span class="metric-val" id="metric-inquiries">0</span>
+              <span class="metric-lbl">Investor Inquiries</span>
+            </div>
+          </div>
+
+          <div class="metric-card glass-card">
+            <div class="metric-icon blue">👁️</div>
+            <div class="metric-info">
+              <span class="metric-val" id="metric-views">142</span>
+              <span class="metric-lbl">Venture Views</span>
+            </div>
+          </div>
+
+          <div class="metric-card glass-card">
+            <div class="metric-icon green">🛡️</div>
+            <div class="metric-info">
+              <span class="metric-val">Verified</span>
+              <span class="metric-lbl">Application Status</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: MY VENTURE -->
+        <section id="ent-tab-my-venture" class="ent-subtab active">
+          <div id="ent-live-venture-container">
+            <!-- Rendered by script.js -->
+          </div>
+        </section>
+
+        <!-- TAB: EDIT VENTURE -->
+        <section id="ent-tab-edit-venture" class="ent-subtab">
+          <div class="edit-venture-card glass-card">
+            <h3>Update Venture Highlights</h3>
+            <p>Modify your venture details in real-time. Changes are instantly reflected across the investor discovery network.</p>
+            <form id="form-edit-venture" class="grid-form two-cols">
+              <div class="input-group aura-field full-width">
+                <label for="edit-vname">Venture Name</label>
+                <input type="text" id="edit-vname" required />
+              </div>
+              <div class="input-group aura-field full-width">
+                <label for="edit-tagline">Short Tagline</label>
+                <input type="text" id="edit-tagline" required />
+              </div>
+              <div class="input-group aura-field">
+                <label for="edit-industry">Industry</label>
+                <select id="edit-industry" class="custom-select">
+                  <option value="AI & Robotics">AI & Robotics</option>
+                  <option value="Greentech">Greentech</option>
+                  <option value="DeepTech">DeepTech</option>
+                  <option value="Healthtech">Healthtech</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="EdTech">EdTech</option>
+                </select>
+              </div>
+              <div class="input-group aura-field">
+                <label for="edit-stage">Development Stage</label>
+                <select id="edit-stage" class="custom-select">
+                  <option value="Idea">Idea</option>
+                  <option value="Research">Research</option>
+                  <option value="Prototype">Prototype</option>
+                  <option value="Developed Product">Developed Product</option>
+                </select>
+              </div>
+              <div class="input-group aura-field">
+                <label for="edit-funding">Target Funding ($ USD)</label>
+                <input type="number" id="edit-funding" required />
+              </div>
+              <div class="input-group aura-field full-width">
+                <label for="edit-problem">Problem Statement</label>
+                <textarea id="edit-problem" rows="3"></textarea>
+              </div>
+              <div class="input-group aura-field full-width">
+                <label for="edit-solution">Proposed Solution</label>
+                <textarea id="edit-solution" rows="3"></textarea>
+              </div>
+              <div class="form-actions full-width">
+                <button type="submit" class="btn-glow-primary">Save Venture Changes</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- TAB: DOCUMENTS VAULT -->
+        <section id="ent-tab-documents" class="ent-subtab">
+          <div class="glass-card">
+            <div class="doc-vault-header">
+              <div>
+                <h3>Confidential Document Repository</h3>
+                <p>Manage uploaded pitch decks, executive summaries, and IP filings.</p>
+              </div>
+            </div>
+            <div id="ent-vault-files-list" class="uploaded-files-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: SPONSORSHIP REQUESTS -->
+        <section id="ent-tab-requests" class="ent-subtab">
+          <div class="glass-card">
+            <h3>Interested Investors & Strategic Inquiries</h3>
+            <p>Accredited investors who have expressed direct interest in backing your venture.</p>
+            <div id="ent-requests-container" class="requests-grid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: MESSAGES -->
+        <section id="ent-tab-messages" class="ent-subtab">
+          <div class="glass-card chat-portal-layout">
+            <div class="chat-thread-list" id="ent-chat-threads">
+              <!-- Populated by script.js -->
+            </div>
+            <div class="chat-conversation-area" id="ent-active-chat">
+              <div class="chat-placeholder">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <p>Select an investor conversation to view and reply to messages.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: PRIVACY CONTROLS -->
+        <section id="ent-tab-privacy" class="ent-subtab">
+          <div class="glass-card">
+            <h3>Privacy, NDA & Confidentiality Shields</h3>
+            <p>You maintain 100% intellectual property ownership and control over what is visible.</p>
+
+            <div class="privacy-toggles-list">
+              <div class="privacy-row">
+                <div class="privacy-info">
+                  <h4>Lock Pitch Deck & Deep Technical Files</h4>
+                  <p>When enabled, investors must request permission before viewing restricted attachments.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-confidential-lock" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="privacy-row">
+                <div class="privacy-info">
+                  <h4>Require Non-Disclosure Agreement (NDA)</h4>
+                  <p>Enforce Nexora standard mutual NDA click-through before sharing proprietary schematics.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-nda-require" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="privacy-row">
+                <div class="privacy-info">
+                  <h4>Hide Personal Contact Details</h4>
+                  <p>Prevent direct exposure of your personal phone and email; use in-app encrypted messaging.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="toggle-hide-contact" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </section>
+
+  </div> <!-- /#app -->
+
+  <!-- ===================================================================== -->
+  <!-- MODALS & OVERLAYS -->
+  <!-- ===================================================================== -->
+
+  <!-- MODAL: VENTURE DETAILS MODAL (FOR SPONSORS) -->
+  <div id="modal-venture-detail" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-dialog glass-card-epic modal-large">
+      <button class="modal-close-btn" id="btn-close-detail-modal" aria-label="Close modal">&times;</button>
+      <div id="modal-venture-body">
+        <!-- Rendered by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EXPRESS INTEREST IN VENTURE -->
+  <div id="modal-express-interest" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-dialog glass-card modal-medium">
+      <button class="modal-close-btn" id="btn-close-interest-modal" aria-label="Close modal">&times;</button>
+      <div class="interest-modal-header">
+        <div class="interest-icon">💼</div>
+        <h3 id="interest-modal-venture-title">Express Interest in Venture</h3>
+        <p>Propose your investment package or schedule an initial founder introductory session.</p>
+      </div>
+
+      <form id="form-express-interest" class="grid-form">
+        <input type="hidden" id="interest-venture-id" />
+
+        <div class="input-group aura-field">
+          <label for="interest-sponsor-name">Your Name / Organization *</label>
+          <input type="text" id="interest-sponsor-name" placeholder="e.g. Apex Horizon Capital" required />
+        </div>
+
+        <div class="input-group aura-field">
+          <label for="interest-sponsor-email">Your Contact Email *</label>
+          <input type="email" id="interest-sponsor-email" placeholder="e.g. partner@apexventures.io" required />
+        </div>
+
+        <div class="input-group aura-field">
+          <label for="interest-proposed-amount">Proposed Capital or Funding Tranche</label>
+          <input type="text" id="interest-proposed-amount" placeholder="e.g. $150,000 Seed Tranche or Strategic Advisory" />
+        </div>
+
+        <div class="input-group full-width">
+          <label>Offered Support Types *</label>
+          <div class="chips-container" id="interest-support-chips">
+            <button type="button" class="support-chip active" data-val="Financial">💰 Financial</button>
+            <button type="button" class="support-chip active" data-val="Mentorship">🧠 Mentorship</button>
+            <button type="button" class="support-chip" data-val="Technical">⚙️ Technical</button>
+            <button type="button" class="support-chip" data-val="Marketing">📢 Network / Go-to-Market</button>
+          </div>
+        </div>
+
+        <div class="input-group aura-field full-width">
+          <label for="interest-message">Personalized Proposal Message *</label>
+          <textarea id="interest-message" rows="4" placeholder="Introduce yourself, what excites you about their innovation, and next steps..." required></textarea>
+        </div>
+
+        <div class="form-actions full-width">
+          <button type="submit" class="btn-glow-primary btn-full">
+            <span>Send Investment Proposal</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GOOGLE AUTH SIMULATION -->
+  <div id="modal-google-auth" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-dialog google-modal-card">
+      <div class="google-modal-header">
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/>
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+          <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 12s.7 2.3 1.9 4.7l3.7-1.9z"/>
+          <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/>
+        </svg>
+        <span>Sign in with Google</span>
+      </div>
+      <p class="google-modal-sub">Choose an account to continue to <strong>NEXORA</strong></p>
+
+      <div class="google-accounts-list">
+        <div class="google-account-item" data-google-email="alex.founder@gmail.com" data-google-name="Alex Chen">
+          <div class="google-avatar">A</div>
+          <div class="google-account-details">
+            <span class="google-name">Alex Chen</span>
+            <span class="google-email">alex.founder@gmail.com</span>
+          </div>
+        </div>
+        <div class="google-account-item" data-google-email="marcus.vance.vc@gmail.com" data-google-name="Marcus Vance">
+          <div class="google-avatar vc">M</div>
+          <div class="google-account-details">
+            <span class="google-name">Marcus Vance</span>
+            <span class="google-email">marcus.vance.vc@gmail.com</span>
+          </div>
+        </div>
+        <div class="google-account-item" data-google-email="new.user@gmail.com" data-google-name="Innovator">
+          <div class="google-avatar new">N</div>
+          <div class="google-account-details">
+            <span class="google-name">Use another account</span>
+            <span class="google-email">new.user@gmail.com</span>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-cancel-google" id="btn-cancel-google">Cancel</button>
+    </div>
+  </div>
+
+  <!-- MODAL: TERMS & PRIVACY POLICY -->
+  <div id="modal-legal" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-dialog glass-card-epic modal-large">
+      <button class="modal-close-btn" id="btn-close-legal-modal" aria-label="Close modal">&times;</button>
+      <div class="legal-modal-content">
+        <div class="legal-header">
+          <h2>NEXORA Terms & Intellectual Property Protection</h2>
+          <span class="legal-date">Last Updated: October 2026 | Standard Version 3.4</span>
+        </div>
+        <div class="legal-scroll-area">
+          <h3>1. Purpose & Confidentiality Shield</h3>
+          <p>NEXORA is a premier venture ecosystem built on uncompromised confidentiality. When an entrepreneur submits a venture proposal or pitch documentation, all proprietary schematics, algorithms, and business plans remain under strict non-disclosure protection. Investors accessing restricted materials agree not to reverse-engineer, leak, or exploit any confidential ideas.</p>
+
+          <h3>2. Intellectual Property Rights</h3>
+          <p>Submission of any venture or document to NEXORA does not transfer any intellectual property rights to the platform or to visiting investors. All patents, copyrights, source code, and trade secrets remain 100% the sole property of the founder/entrepreneur.</p>
+
+          <h3>3. Mandatory Accreditation & Role-Based Access</h3>
+          <p>Investors undergo identity verification before unlocking confidential attachments. Entrepreneurs retain granular authority to toggle files between public summary and restricted access at any time through their Privacy Controls.</p>
+
+          <h3>4. User Conduct & Safe Communication</h3>
+          <p>All discussions through the NEXORA secure communication feature are encrypted. Solicitation of fraudulent investment or violation of international securities laws will lead to immediate account termination and legal enforcement.</p>
+        </div>
+        <div class="legal-footer">
+          <button type="button" id="btn-agree-legal-close" class="btn-glow-primary">
+            I Understand & Agree
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CELEBRATION / SUCCESS AFTER SUBMITTING VENTURE -->
+  <div id="modal-submission-celebration" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-dialog glass-card-epic celebration-card">
+      <div class="celebration-badge-pulse">🎉</div>
+      <h2 class="celebration-headline">Congratulations, Innovator!</h2>
+      <p class="celebration-quote">
+        "Your idea has officially entered Nexora. Your journey towards opportunity begins now!"
+      </p>
+      <p class="celebration-subtext">
+        Your venture is now protected, indexed, and visible to verified investors and corporate partners matching your industry domain.
+      </p>
+      <button id="btn-proceed-to-ent-dash" class="btn-glow-primary btn-large">
+        <span>Enter Your Founder Dashboard</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="db.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
