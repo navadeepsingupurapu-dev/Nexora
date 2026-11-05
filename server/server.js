@@ -86,6 +86,29 @@ app.use(cors({
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
+// ----------------------------------------------------------------------------
+// Static Frontend File Serving
+// Guarantees that requests to /, /style.css, /script.js, /db.js, etc. are served
+// seamlessly whether run locally or through Vercel Serverless Functions.
+// ----------------------------------------------------------------------------
+const ROOT_DIR = path.join(__dirname, '..');
+
+// Serve static assets from project root
+app.use(express.static(ROOT_DIR));
+
+// Explicit root route handler to prevent "Cannot GET /"
+app.get('/', (req, res) => {
+  const indexPath = path.join(ROOT_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.sendFile('index.html', { root: ROOT_DIR }, (err) => {
+    if (err) {
+      res.status(200).send('<!DOCTYPE html><html><head><title>NEXORA</title><meta http-equiv="refresh" content="0; url=/index.html"></head><body>Loading NEXORA...</body></html>');
+    }
+  });
+});
+
 // Static uploads serving (for local environments when uploads exist)
 try {
   if (fs.existsSync(UPLOAD_DIR)) {
@@ -472,6 +495,22 @@ app.get('/api', (req, res) => {
       '/api/messages',
       '/api/upload'
     ]
+  });
+});
+
+// Client-side route fallback for non-API routes
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  const indexPath = path.join(ROOT_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.sendFile('index.html', { root: ROOT_DIR }, (err) => {
+    if (err) {
+      res.status(404).send('Not Found');
+    }
   });
 });
 
