@@ -2,6 +2,7 @@
  * ============================================================================
  * NEXORA BACKEND API SERVER
  * Brand: NEXORA | Tagline: Ideas Meet Opportunity
+ * Compatible with Local Node.js and Vercel Serverless Functions
  * ============================================================================
  */
 
@@ -9,50 +10,123 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const DB_FILE = process.env.VERCEL ? path.join('/tmp', 'database.json') : path.join(__dirname, 'database.json');
-const UPLOAD_DIR = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
 
-// Ensure upload directory exists safely
+// Resolve safe database and upload locations for local vs serverless
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DB_FILE = isVercel ? path.join('/tmp', 'nexora_database.json') : path.join(__dirname, 'database.json');
+const UPLOAD_DIR = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
+
+// Safe filesystem initialization
 try {
   if (!fs.existsSync(UPLOAD_DIR)) {
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   }
 } catch (err) {
-  // Gracefully handle read-only environments
+  // Read-only filesystem fallback — serverless safe
 }
 
 // ----------------------------------------------------------------------------
-// Built-in Database Handler (Clean starting state with zero initial data)
+// In-Memory Fallback & Safe JSON Database Layer
+// Guarantees zero crash on read-only environments while persisting to disk/tmp when possible.
 // ----------------------------------------------------------------------------
+let memoryDB = {
+  users: [],
+  ventures: [],
+  investmentRequests: [],
+  investorHistories: [],
+  sponsorHistories: [],
+  messages: []
+};
+
 function loadDB() {
-  if (!fs.existsSync(DB_FILE)) {
-    const initialData = {
-      users: [],
-      ventures: [],
-      investmentRequests: [],
-      investorHistories: [],
-      messages: []
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-    return initialData;
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const content = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(content);
+      memoryDB = {
+        users: Array.isArray(parsed.users) ? parsed.users : [],
+        ventures: Array.isArray(parsed.ventures) ? parsed.ventures : [],
+        investmentRequests: Array.isArray(parsed.investmentRequests) ? parsed.investmentRequests : [],
+        investorHistories: Array.isArray(parsed.investorHistories) ? parsed.investorHistories : (Array.isArray(parsed.sponsorHistories) ? parsed.sponsorHistories : []),
+        sponsorHistories: Array.isArray(parsed.sponsorHistories) ? parsed.sponsorHistories : (Array.isArray(parsed.investorHistories) ? parsed.investorHistories : []),
+        messages: Array.isArray(parsed.messages) ? parsed.messages : []
+      };
+      return memoryDB;
+    } else {
+      saveDB(memoryDB);
+    }
+  } catch (err) {
+    // Graceful fallback to memory store
   }
-  return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  return memoryDB;
 }
 
 function saveDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  memoryDB = data || memoryDB;
+  if (!memoryDB.sponsorHistories) memoryDB.sponsorHistories = memoryDB.investorHistories || [];
+  if (!memoryDB.investorHistories) memoryDB.investorHistories = memoryDB.sponsorHistories || [];
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(memoryDB, null, 2));
+  } catch (err) {
+    // In serverless / read-only environment, keep updated in memoryDB
+  }
 }
 
 // ----------------------------------------------------------------------------
-// Middleware
+// Middleware Configuration
 // ----------------------------------------------------------------------------
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(UPLOAD_DIR));
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+
+// Static uploads serving (for local environments when uploads exist)
+try {
+  if (fs.existsSync(UPLOAD_DIR)) {
+    app.use('/uploads', express.static(UPLOAD_DIR));
+  }
+} catch (e) {}
+
+// ----------------------------------------------------------------------------
+// Safe File Upload Handling (Memory-based, No persistent disk write requirement)
+// ----------------------------------------------------------------------------
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10 MB limit
+  }
+});
+
+app.post('/api/upload', (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'File upload failed' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+
+    const ext = req.file.originalname.split('.').pop().toLowerCase();
+    const base64Data = req.file.buffer.toString('base64');
+    const dataUrl = `data:${req.file.mimetype || 'application/octet-stream'};base64,${base64Data}`;
+
+    // Return document metadata and safe data URI for client-side rendering
+    return res.status(201).json({
+      id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name: req.file.originalname,
+      size: req.file.size,
+      type: req.file.mimetype || ext,
+      dataUrl: dataUrl,
+      isConfidential: true
+    });
+  });
+});
 
 // ----------------------------------------------------------------------------
 // Authentication Endpoints
@@ -82,7 +156,7 @@ app.post('/api/auth/register', (req, res) => {
     email: identifier.includes('@') ? identifier : (googleProfile ? googleProfile.email : ''),
     phone: !identifier.includes('@') ? identifier : '',
     name: googleProfile ? googleProfile.name : identifier.split('@')[0],
-    role: null, // to be chosen on Journey selection
+    role: null,
     termsAccepted: true,
     authMethod: method || 'standard',
     createdAt: new Date().toISOString()
@@ -106,7 +180,10 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   const db = loadDB();
-  const user = db.users.find(u => u.email.toLowerCase() === identifier.toLowerCase() || u.phone === identifier);
+  const user = db.users.find(u =>
+    (u.email && u.email.toLowerCase() === identifier.toLowerCase()) ||
+    (u.phone && u.phone === identifier)
+  );
 
   if (!user) {
     return res.status(404).json({ error: 'Account not found. Please sign up first.' });
@@ -118,17 +195,18 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
-// Update Role (Journey choice)
+// Update Role (Journey choice: investor or entrepreneur)
 app.post('/api/auth/role', (req, res) => {
   const { userId, role } = req.body;
-  if (!['sponsor', 'entrepreneur'].includes(role)) {
+  const normalizedRole = role === 'sponsor' ? 'investor' : role;
+  if (!['investor', 'sponsor', 'entrepreneur'].includes(role)) {
     return res.status(400).json({ error: 'Invalid role choice.' });
   }
 
   const db = loadDB();
   const user = db.users.find(u => u.id === userId);
   if (user) {
-    user.role = role;
+    user.role = normalizedRole;
     saveDB(db);
     return res.json({ message: 'Role updated successfully', user });
   }
@@ -136,28 +214,39 @@ app.post('/api/auth/role', (req, res) => {
 });
 
 // ----------------------------------------------------------------------------
-// Sponsor Track Record Questionnaire
+// Investor / Sponsor Track Record Questionnaire
 // ----------------------------------------------------------------------------
-app.post('/api/sponsors/history', (req, res) => {
-  const { userId, sponsorName, entrepreneurName, ideaSponsored, supportType, details } = req.body;
+const handleInvestorHistory = (req, res) => {
+  const { userId, sponsorName, investorName, entrepreneurName, ideaSponsored, ideaInvested, supportType, details } = req.body;
   const db = loadDB();
 
   const record = {
     id: 'hist_' + Date.now(),
     userId,
-    sponsorName,
-    entrepreneurName,
-    ideaSponsored,
-    supportType,
+    investorName: investorName || sponsorName || 'Investor',
+    sponsorName: sponsorName || investorName || 'Investor',
+    entrepreneurName: entrepreneurName || '',
+    ideaInvested: ideaInvested || ideaSponsored || '',
+    ideaSponsored: ideaSponsored || ideaInvested || '',
+    supportType: supportType || 'Financial',
     details: details || '',
     createdAt: new Date().toISOString()
   };
 
-  db.sponsorHistories.push(record);
+  if (!db.investorHistories) db.investorHistories = [];
+  if (!db.sponsorHistories) db.sponsorHistories = db.investorHistories;
+
+  db.investorHistories.push(record);
+  if (db.sponsorHistories !== db.investorHistories) {
+    db.sponsorHistories.push(record);
+  }
   saveDB(db);
 
-  res.status(201).json({ message: 'Sponsor track record recorded successfully', record });
-});
+  res.status(201).json({ message: 'Investment track record recorded successfully', record });
+};
+
+app.post('/api/investors/history', handleInvestorHistory);
+app.post('/api/sponsors/history', handleInvestorHistory);
 
 // ----------------------------------------------------------------------------
 // Ventures Endpoints
@@ -167,25 +256,25 @@ app.post('/api/sponsors/history', (req, res) => {
 app.get('/api/ventures', (req, res) => {
   const { search, industry, stage, fundingMax } = req.query;
   const db = loadDB();
-  let list = db.ventures;
+  let list = [...db.ventures];
 
   if (search) {
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
     list = list.filter(v =>
-      v.title.toLowerCase().includes(q) ||
-      v.tagline.toLowerCase().includes(q) ||
-      v.problem.toLowerCase().includes(q) ||
-      v.solution.toLowerCase().includes(q) ||
-      v.founderName.toLowerCase().includes(q)
+      (v.title && v.title.toLowerCase().includes(q)) ||
+      (v.tagline && v.tagline.toLowerCase().includes(q)) ||
+      (v.problem && v.problem.toLowerCase().includes(q)) ||
+      (v.solution && v.solution.toLowerCase().includes(q)) ||
+      (v.founderName && v.founderName.toLowerCase().includes(q))
     );
   }
 
   if (industry && industry !== 'all') {
-    list = list.filter(v => v.industry.toLowerCase() === industry.toLowerCase());
+    list = list.filter(v => v.industry && v.industry.toLowerCase() === industry.toLowerCase());
   }
 
   if (stage && stage !== 'all') {
-    list = list.filter(v => v.stage.toLowerCase() === stage.toLowerCase());
+    list = list.filter(v => v.stage && v.stage.toLowerCase() === stage.toLowerCase());
   }
 
   if (fundingMax && fundingMax !== 'all') {
@@ -238,7 +327,7 @@ app.post('/api/ventures', (req, res) => {
     stage: venture.stage || 'Idea',
     fundingNeeded: numFunding,
     fundingDisplay: '$' + numFunding.toLocaleString(),
-    supportTypes: funding.supportTypes || ['Financial'],
+    supportTypes: funding.supportTypes || ['Financial Investment'],
     problem: venture.problem || '',
     solution: venture.solution || '',
     beneficiaries: venture.beneficiaries || '',
@@ -276,36 +365,51 @@ app.put('/api/ventures/:id', (req, res) => {
 
 // Express Interest in Venture
 app.post('/api/ventures/:id/express-interest', (req, res) => {
-  const { sponsorId, sponsorName, sponsorEmail, offeredSupport, proposedAmount, message } = req.body;
+  const { sponsorId, investorId, sponsorName, investorName, sponsorEmail, investorEmail, offeredSupport, proposedAmount, message } = req.body;
   const db = loadDB();
   const venture = db.ventures.find(v => v.id === req.params.id);
   if (!venture) {
     return res.status(404).json({ error: 'Venture not found' });
   }
 
+  const effectiveId = investorId || sponsorId || 'anon_investor';
+  const effectiveName = investorName || sponsorName || 'Verified Investor';
+  const effectiveEmail = investorEmail || sponsorEmail || 'investor@example.com';
+
   const request = {
-    id: 'req_' + Date.now(),
+    id: 'inv_req_' + Date.now(),
     ventureId: venture.id,
     ventureTitle: venture.title,
-    sponsorId: sponsorId || 'anon_sponsor',
-    sponsorName: sponsorName || 'Venture Sponsor',
-    sponsorEmail: sponsorEmail || 'sponsor@example.com',
-    offeredSupport: offeredSupport || ['Financial'],
+    investorId: effectiveId,
+    sponsorId: effectiveId,
+    investorName: effectiveName,
+    sponsorName: effectiveName,
+    investorEmail: effectiveEmail,
+    sponsorEmail: effectiveEmail,
+    offeredSupport: offeredSupport || ['Financial Investment'],
     proposedAmount: proposedAmount || 'Flexible',
     message: message || 'I am interested in backing this opportunity.',
     status: 'Pending Review',
     createdAt: new Date().toISOString()
   };
 
-  db.sponsorshipRequests.unshift(request);
+  if (!db.investmentRequests) db.investmentRequests = [];
+  if (!db.sponsorshipRequests) db.sponsorshipRequests = db.investmentRequests;
+
+  db.investmentRequests.unshift(request);
+  if (db.sponsorshipRequests !== db.investmentRequests) {
+    db.sponsorshipRequests.unshift(request);
+  }
+
   venture.inquiries = (venture.inquiries || 0) + 1;
 
   // Automatically start message thread
+  if (!db.messages) db.messages = [];
   db.messages.push({
     id: 'msg_' + Date.now(),
     ventureId: venture.id,
-    senderRole: 'sponsor',
-    senderName: sponsorName,
+    senderRole: 'investor',
+    senderName: effectiveName,
     text: message,
     timestamp: new Date().toISOString()
   });
@@ -317,7 +421,7 @@ app.post('/api/ventures/:id/express-interest', (req, res) => {
 // Get Messages for a Venture
 app.get('/api/messages/:ventureId', (req, res) => {
   const db = loadDB();
-  const msgs = db.messages.filter(m => m.ventureId === req.params.ventureId);
+  const msgs = (db.messages || []).filter(m => m.ventureId === req.params.ventureId);
   res.json({ messages: msgs });
 });
 
@@ -329,11 +433,12 @@ app.post('/api/messages', (req, res) => {
   }
 
   const db = loadDB();
+  if (!db.messages) db.messages = [];
   const msg = {
     id: 'msg_' + Date.now(),
     ventureId,
-    senderRole,
-    senderName,
+    senderRole: senderRole || 'investor',
+    senderName: senderName || 'User',
     text,
     timestamp: new Date().toISOString()
   };
@@ -349,20 +454,36 @@ app.get('/api/health', (req, res) => {
     status: 'active',
     brand: 'NEXORA',
     tagline: 'Ideas Meet Opportunity',
+    serverless: isVercel,
     timestamp: new Date().toISOString()
   });
 });
 
-if (!process.env.VERCEL) {
+// Root fallback for /api
+app.get('/api', (req, res) => {
+  res.json({
+    message: 'NEXORA API Gateway Active',
+    endpoints: [
+      '/api/health',
+      '/api/auth/register',
+      '/api/auth/login',
+      '/api/ventures',
+      '/api/investors/history',
+      '/api/messages',
+      '/api/upload'
+    ]
+  });
+});
+
+// Start HTTP listener only when run standalone (not in Vercel serverless)
+if (!isVercel) {
   app.listen(PORT, () => {
     console.log(`=================================================`);
     console.log(`  NEXORA BACKEND SERVER ACTIVE`);
     console.log(`  Port: ${PORT}`);
     console.log(`  API Health: http://localhost:${PORT}/api/health`);
-    console.log(`  Database: ${DB_FILE}`);
     console.log(`=================================================`);
   });
 }
 
 module.exports = app;
-

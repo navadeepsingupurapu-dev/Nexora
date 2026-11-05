@@ -2,15 +2,26 @@
  * ============================================================================
  * NEXORA CLIENT DATABASE & PERSISTENCE LAYER (db.js)
  * High-performance browser-native storage with zero pre-loaded data.
- * Starts completely fresh from the beginning.
+ * Compatible with Local Development, GitHub Pages, and Vercel Serverless.
  * ============================================================================
  */
 
 (function () {
-  // New storage key to guarantee completely fresh, empty state
   const STORAGE_KEY = 'NEXORA_CLEAN_DATABASE_V1';
   const CURRENT_USER_KEY = 'NEXORA_CLEAN_SESSION_V1';
-  const BACKEND_URL = 'http://localhost:5000/api';
+
+  // Dynamic Backend URL resolution: prevents hardcoded localhost mixed-content in production
+  function resolveBackendUrl() {
+    if (typeof window !== 'undefined' && window.location) {
+      if (window.location.hostname === 'localhost' && window.location.port && window.location.port !== '5000') {
+        return 'http://localhost:5000/api';
+      }
+      return '/api';
+    }
+    return '/api';
+  }
+
+  const BACKEND_URL = resolveBackendUrl();
 
   // Clear any legacy test data from prior iterations
   try {
@@ -32,6 +43,7 @@
     constructor() {
       this.data = this.init();
       this.isBackendAvailable = false;
+      this.backendUrl = BACKEND_URL;
       this.checkBackend();
     }
 
@@ -66,15 +78,37 @@
 
     async checkBackend() {
       try {
-        const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(1500) });
+        const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(2000) });
         if (res.ok) {
           this.isBackendAvailable = true;
-          console.log('%c[NEXORA]%c Connected to Node.js Backend API at ' + BACKEND_URL, 'color:#2563eb;font-weight:bold;', 'color:#10b981;');
+          console.log('%c[NEXORA]%c Connected to Backend API at ' + BACKEND_URL, 'color:#2563eb;font-weight:bold;', 'color:#10b981;');
+          this.syncFromBackend();
+        } else {
+          this.isBackendAvailable = false;
         }
       } catch (e) {
         this.isBackendAvailable = false;
-        console.log('%c[NEXORA]%c Clean Mode Active (Local Database Engine)', 'color:#2563eb;font-weight:bold;', 'color:#0ea5e9;');
+        console.log('%c[NEXORA]%c Local Client Engine Active', 'color:#2563eb;font-weight:bold;', 'color:#0ea5e9;');
       }
+    }
+
+    async syncFromBackend() {
+      if (!this.isBackendAvailable) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/ventures`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && Array.isArray(json.ventures) && json.ventures.length > 0) {
+            const existingIds = new Set(this.data.ventures.map(v => v.id));
+            json.ventures.forEach(bv => {
+              if (!existingIds.has(bv.id)) {
+                this.data.ventures.push(bv);
+              }
+            });
+            this.persist();
+          }
+        }
+      } catch (err) {}
     }
 
     // ---------------------------------------------------------
@@ -130,6 +164,16 @@
 
       this.data.users.push(newUser);
       this.persist();
+
+      // Mirror to backend if connected
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, termsAccepted: true, method: options.method, googleProfile: options.googleProfile })
+        }).catch(() => {});
+      }
+
       return { user: newUser, isNew: true };
     }
 
@@ -139,11 +183,20 @@
         (u.email && u.email.toLowerCase() === idf) ||
         (u.phone && u.phone === idf)
       );
+
+      // Async verification with backend if available
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier })
+        }).catch(() => {});
+      }
+
       return user || null;
     }
 
     updateUserRole(userId, role) {
-      // Normalize 'sponsor' to 'investor'
       const normalizedRole = role === 'sponsor' ? 'investor' : role;
       const user = this.data.users.find(u => u.id === userId);
       if (user) {
@@ -153,6 +206,14 @@
         if (current && current.id === userId) {
           current.role = normalizedRole;
           this.setCurrentUser(current);
+        }
+
+        if (this.isBackendAvailable) {
+          fetch(`${BACKEND_URL}/auth/role`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, role: normalizedRole })
+          }).catch(() => {});
         }
       }
       return user;
@@ -165,15 +226,26 @@
       const record = {
         id: 'inv_hist_' + Date.now(),
         userId,
-        investorName: payload.investorName || payload.sponsorName,
-        entrepreneurName: payload.entrepreneurName,
-        ideaInvested: payload.ideaInvested || payload.ideaSponsored,
-        supportType: payload.supportType,
+        investorName: payload.investorName || payload.sponsorName || 'Investor',
+        sponsorName: payload.sponsorName || payload.investorName || 'Investor',
+        entrepreneurName: payload.entrepreneurName || '',
+        ideaInvested: payload.ideaInvested || payload.ideaSponsored || '',
+        ideaSponsored: payload.ideaSponsored || payload.ideaInvested || '',
+        supportType: payload.supportType || 'Financial',
         details: payload.details || '',
         createdAt: new Date().toISOString()
       };
       this.data.investorHistories.push(record);
       this.persist();
+
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/investors/history`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        }).catch(() => {});
+      }
+
       return record;
     }
 
@@ -201,11 +273,11 @@
       }
 
       if (filters.industry && filters.industry !== 'all') {
-        list = list.filter(v => v.industry.toLowerCase() === filters.industry.toLowerCase());
+        list = list.filter(v => v.industry && v.industry.toLowerCase() === filters.industry.toLowerCase());
       }
 
       if (filters.stage && filters.stage !== 'all') {
-        list = list.filter(v => v.stage.toLowerCase() === filters.stage.toLowerCase());
+        list = list.filter(v => v.stage && v.stage.toLowerCase() === filters.stage.toLowerCase());
       }
 
       if (filters.fundingMax && filters.fundingMax !== 'all') {
@@ -263,6 +335,15 @@
 
       this.data.ventures.unshift(newVenture);
       this.persist();
+
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/ventures`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      }
+
       return newVenture;
     }
 
@@ -271,6 +352,15 @@
       if (index !== -1) {
         this.data.ventures[index] = { ...this.data.ventures[index], ...fields };
         this.persist();
+
+        if (this.isBackendAvailable) {
+          fetch(`${BACKEND_URL}/ventures/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fields)
+          }).catch(() => {});
+        }
+
         return this.data.ventures[index];
       }
       return null;
@@ -338,6 +428,15 @@
       });
 
       this.persist();
+
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/ventures/${ventureId}/express-interest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      }
+
       return request;
     }
 
@@ -376,6 +475,15 @@
       };
       this.data.messages.push(msg);
       this.persist();
+
+      if (this.isBackendAvailable) {
+        fetch(`${BACKEND_URL}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ventureId, senderRole, senderName, text })
+        }).catch(() => {});
+      }
+
       return msg;
     }
   }

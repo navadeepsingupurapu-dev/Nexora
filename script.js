@@ -1157,19 +1157,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const fileObj = {
-        id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        name: file.name,
-        size: formatFileSize(file.size),
-        type: file.type || ext,
-        isConfidential: true
+      // Safe memory-based document handling (Vercel serverless compatible, zero persistent disk dependency)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileObj = {
+          id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: file.type || ext,
+          dataUrl: event.target.result,
+          isConfidential: true
+        };
+
+        state.wizardData.documents.push(fileObj);
+        showToast(`Uploaded: ${file.name}`, 'success');
+        renderUploadedFilesList();
+      };
+      reader.onerror = () => {
+        const fileObj = {
+          id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: file.type || ext,
+          isConfidential: true
+        };
+        state.wizardData.documents.push(fileObj);
+        showToast(`Uploaded: ${file.name}`, 'success');
+        renderUploadedFilesList();
       };
 
-      state.wizardData.documents.push(fileObj);
-      showToast(`Uploaded: ${file.name}`, 'success');
+      // Only read as data URL if small enough for localStorage (< 4MB) to prevent quota exhaustion
+      if (file.size < 4 * 1024 * 1024) {
+        reader.readAsDataURL(file);
+      } else {
+        const fileObj = {
+          id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: file.type || ext,
+          isConfidential: true
+        };
+        state.wizardData.documents.push(fileObj);
+        showToast(`Uploaded: ${file.name}`, 'success');
+        renderUploadedFilesList();
+      }
     });
-
-    renderUploadedFilesList();
   }
 
   function formatFileSize(bytes) {
